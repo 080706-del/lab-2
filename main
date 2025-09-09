@@ -1,0 +1,184 @@
+import java.util.Scanner;
+
+public class Principal {
+    private Scanner scanner;
+    private JuegoMemoria juego;
+
+    public Principal() {
+        scanner = new Scanner(System.in);
+    }
+
+    public static void main(String[] args) {
+        Principal programa = new Principal();
+        programa.iniciarPrograma();
+    }
+
+    public void iniciarPrograma() {
+        System.out.println(" ESTE ES EL JUEGO DE MEMORIA ");
+        System.out.println("Bienvenido al juego de memoria!");
+
+        boolean seguirJugando = true;
+        while (seguirJugando) {
+            if (juego == null) {
+                configurarJuego();
+            }
+
+            jugarPartida();
+            mostrarResultados();
+
+            System.out.println("\n¿Quiere jugar otra vez? (s/n): ");
+            String respuesta = scanner.nextLine();
+            
+            if (respuesta.equalsIgnoreCase("s")) {
+                System.out.println("1. Mismo jugadores, nuevo tablero");
+                System.out.println("2. Jugadores nuevos");
+                System.out.println("Elige opcion: ");
+                
+                int opcion = 0;
+                boolean entradaValida = false;
+                while (!entradaValida) {
+                    try {
+                        opcion = scanner.nextInt();
+                        scanner.nextLine(); 
+                        entradaValida = true;
+                    } catch (Exception e) {
+                        System.out.println("Ingresa un numero valido: ");
+                        scanner.nextLine(); 
+                    }
+                }
+                
+                if (opcion == 1) {
+                    int nuevoTamaño = solicitarTamañoTablero();
+                    juego.reiniciarJuego(nuevoTamaño);
+                } else {
+                    juego = null; 
+                }
+            } else {
+                seguirJugando = false;
+            }
+        }
+
+        System.out.println("¡Gracias por haber jugado!");
+        scanner.close();
+    }
+
+    private void configurarJuego() {
+        System.out.println("\nNUEVO JUEGO");
+        
+        System.out.println("Nombre del Jugador 1: ");
+        String nombre1 = scanner.nextLine();
+        
+        System.out.println("Nombre del Jugador 2: ");
+        String nombre2 = scanner.nextLine();
+        
+        int tamaño = solicitarTamañoTablero();
+        
+        juego = new JuegoMemoria(nombre1, nombre2, tamaño);
+    }
+
+    private int solicitarTamañoTablero() {
+        System.out.println("\nTamaño del tablero:");
+        System.out.println("1. 4x4 (facil)");
+        System.out.println("2. 6x6 (dificil)");
+        System.out.println("Elige: ");
+        
+        int opcion = 0;
+        boolean valido = false;
+        while (!valido) {
+            try {
+                opcion = scanner.nextInt();
+                scanner.nextLine(); 
+                if (opcion == 1 || opcion == 2) {
+                    valido = true;
+                } else {
+                    System.out.println("Solo 1 o 2. Intenta de nuevo: ");
+                }
+            } catch (Exception e) {
+                System.out.println("Ingresa 1 o 2: ");
+                scanner.nextLine();
+            }
+        }
+        
+        if (opcion == 1) {
+            return 4;
+        } else {
+            return 6;
+        }
+    }
+
+    private void jugarPartida() {
+        System.out.println("\n EMPEZANDO JUEGO");
+        
+        while (!juego.isJuegoTerminado()) {
+            mostrarEstadoJuego();
+            procesarTurno();
+            
+            if (!juego.isJuegoTerminado()) {
+                esperarEnter();
+                juego.ocultarFichas();
+            }
+        }
+    }
+
+    private void mostrarEstadoJuego() {
+        System.out.println(juego.getTablero().mostrarTablero());
+        
+        Jugador[] jugadores = juego.getJugadores();
+        System.out.println("Puntos:");
+        System.out.println(jugadores[0].getNombre() + ": " + jugadores[0].getPuntos());
+        System.out.println(jugadores[1].getNombre() + ": " + jugadores[1].getPuntos());
+        
+        System.out.println("\nTurno de: " + juego.getJugadorActual().getNombre());
+    }
+
+    private void procesarTurno() {
+        boolean turnoCompleto = false;
+        
+        while (!turnoCompleto) {
+            System.out.println("\nSelecciona dos posiciones (fila1 col1 fila2 col2):");
+            System.out.println("Ejemplo: 0 1 2 3");
+            
+            try {
+                int fila1 = scanner.nextInt();
+                int col1 = scanner.nextInt();
+                int fila2 = scanner.nextInt();
+                int col2 = scanner.nextInt();
+                scanner.nextLine(); 
+                
+                String resultado = juego.jugarTurno(fila1, col1, fila2, col2);
+                System.out.println(resultado);
+                
+                if (!resultado.contains("invalidas") && !resultado.contains("misma casilla")) {
+                    turnoCompleto = true;
+                    System.out.println(juego.getTablero().mostrarTablero());
+                }
+                
+            } catch (Exception e) {
+                System.out.println("Formato incorrecto. intenta usar: fila1 col1 fila2 col2");
+                scanner.nextLine(); 
+            }
+        }
+    }
+
+    private void esperarEnter() {
+        System.out.println("\nPresiona Enter para PODER continuar...");
+        scanner.nextLine();
+    }
+
+    private void mostrarResultados() {
+        System.out.println("\nEL JUEGO ACABÓ!");
+        System.out.println(juego.getTablero().mostrarTablero());
+        
+        Jugador[] jugadores = juego.getJugadores();
+        System.out.println("Puntos finales:");
+        System.out.println(jugadores[0].getNombre() + ": " + jugadores[0].getPuntos());
+        System.out.println(jugadores[1].getNombre() + ": " + jugadores[1].getPuntos());
+        
+        Jugador ganador = juego.getGanador();
+        if (ganador != null) {
+            System.out.println("\n¡GANADOR: " + ganador.getNombre() + "!");
+        } else {
+            System.out.println("\n¡ ES UN EMPATE!");
+        }
+    }
+}
