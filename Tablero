@@ -1,0 +1,107 @@
+import java.util.Random;
+
+public class Tablero {
+    private Ficha[][] fichas;
+    private int tamaño;
+    private String[] simbolos;
+
+    public Tablero(int tamaño) {
+        this.tamaño = tamaño;
+        this.fichas = new Ficha[tamaño][tamaño];
+        this.simbolos = new String[]{"🎮", "🎯", "🎪", "🎨", "🎭", "🎲", "🎸", "🎺", 
+                                    "🍎", "🍊", "🍋", "🍌", "🍇", "🍓", "⚽", "🏀", "🎾", "🏆"};
+        inicializarTablero();
+    }
+    private void inicializarTablero() {
+        int totalCasillas = tamaño * tamaño;
+        int numPares = totalCasillas / 2;
+
+        String[] fichasTemp = new String[totalCasillas];
+
+        for (int i = 0; i < numPares; i++) {
+            fichasTemp[i * 2] = simbolos[i];
+            fichasTemp[i * 2 + 1] = simbolos[i];
+        }
+
+        Random rand = new Random();
+        for (int i = 0; i < totalCasillas; i++) {
+            int pos = rand.nextInt(totalCasillas);
+            String temp = fichasTemp[i];
+            fichasTemp[i] = fichasTemp[pos];
+            fichasTemp[pos] = temp;
+        }
+
+        int contador = 0;
+        for (int i = 0; i < tamaño; i++) {
+            for (int j = 0; j < tamaño; j++) {
+                fichas[i][j] = new Ficha(fichasTemp[contador]);
+                contador++;
+            }
+        }
+    }
+    public String mostrarTablero() {
+        String resultado = "\n   ";
+
+        for (int j = 0; j < tamaño; j++) {
+            resultado = resultado + " " + j + " ";
+        }
+        resultado = resultado + "\n";
+
+        for (int i = 0; i < tamaño; i++) {
+            resultado = resultado + i + "  ";
+            for (int j = 0; j < tamaño; j++) {
+                if (fichas[i][j].isDescubierta() || fichas[i][j].isEmparejada()) {
+                    resultado = resultado + fichas[i][j].getSimbolo() + " ";
+                } else {
+                    resultado = resultado + "❓ ";
+                }
+            }
+            resultado = resultado + "\n";
+        }
+        return resultado;
+    }
+
+    public boolean seleccionarFicha(int fila, int columna) {
+        if (verificarPosicion(fila, columna)) {
+            fichas[fila][columna].descubrir();
+            return true;
+        }
+        return false;
+    }
+
+    public void ocultarFichas() {
+        for (int i = 0; i < tamaño; i++) {
+            for (int j = 0; j < tamaño; j++) {
+                if (!fichas[i][j].isEmparejada()) {
+                    fichas[i][j].ocultar();
+                }
+            }
+        }
+    }
+
+    public boolean verificarPosicion(int fila, int columna) {
+        if (fila >= 0 && fila < tamaño && columna >= 0 && columna < tamaño) {
+            return !fichas[fila][columna].isEmparejada() && !fichas[fila][columna].isDescubierta();
+        }
+        return false;
+    }
+
+    public boolean todasEmparejadas() {
+        for (int i = 0; i < tamaño; i++) {
+            for (int j = 0; j < tamaño; j++) {
+                if (!fichas[i][j].isEmparejada()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public Ficha getFicha(int fila, int columna) {
+        return fichas[fila][columna];
+    }
+    public void emparejarFichas(int fila1, int col1, int fila2, int col2) {
+        fichas[fila1][col1].emparejar();
+        fichas[fila2][col2].emparejar();
+    }
+}
