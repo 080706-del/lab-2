@@ -1,0 +1,97 @@
+public class JuegoMemoria {
+    private Jugador jugador1;
+    private Jugador jugador2;
+    private Tablero tablero;
+    private int turnoActual;
+    private boolean juegoTerminado;
+
+    public JuegoMemoria(String nombre1, String nombre2, int tamaño) {
+        this.jugador1 = new Jugador(nombre1);
+        this.jugador2 = new Jugador(nombre2);
+        this.tablero = new Tablero(tamaño);
+        this.turnoActual = 1;
+        this.juegoTerminado = false;
+    }
+
+    public String jugarTurno(int fila1, int col1, int fila2, int col2) {
+        if (fila1 == fila2 && col1 == col2) {
+            return "No puedes seleccionar la misma casilla dos veces.";
+        }
+
+        if (!tablero.verificarPosicion(fila1, col1) || !tablero.verificarPosicion(fila2, col2)) {
+            return "Una o ambas posiciones son invalidas.";
+        }
+
+        tablero.seleccionarFicha(fila1, col1);
+        tablero.seleccionarFicha(fila2, col2);
+
+        Ficha ficha1 = tablero.getFicha(fila1, col1);
+        Ficha ficha2 = tablero.getFicha(fila2, col2);
+
+        if (ficha1.getSimbolo().equals(ficha2.getSimbolo())) {
+            tablero.emparejarFichas(fila1, col1, fila2, col2);
+            getJugadorActual().sumarPunto();
+            
+            if (tablero.todasEmparejadas()) {
+                juegoTerminado = true;
+            }
+            
+            return "¡Encontraste un par! Sigues jugando.";
+        } else {
+            cambiarTurno();
+            return "No coinciden. Cambia de turno.";
+        }
+    }
+
+    private void cambiarTurno() {
+        if (turnoActual == 1) {
+            turnoActual = 2;
+        } else {
+            turnoActual = 1;
+        }
+    }
+    public Jugador getJugadorActual() {
+        if (turnoActual == 1) {
+            return jugador1;
+        } else {
+            return jugador2;
+        }
+    }
+
+    public Jugador getGanador() {
+        if (jugador1.getPuntos() > jugador2.getPuntos()) {
+            return jugador1;
+        } else if (jugador2.getPuntos() > jugador1.getPuntos()) {
+            return jugador2;
+        } else {
+            return null; 
+        }
+    }
+
+    public boolean isJuegoTerminado() {
+        return juegoTerminado;
+    }
+
+    public Tablero getTablero() {
+        return tablero;
+    }
+
+    public Jugador[] getJugadores() {
+        Jugador[] jugadores = new Jugador[2];
+        jugadores[0] = jugador1;
+        jugadores[1] = jugador2;
+        return jugadores;
+    }
+
+    public void ocultarFichas() {
+        tablero.ocultarFichas();
+    }
+
+    public void reiniciarJuego(int tamaño) {
+        jugador1.reiniciarPuntos();
+        jugador2.reiniciarPuntos();
+        tablero = new Tablero(tamaño);
+        turnoActual = 1;
+        juegoTerminado = false;
+    }
+}
